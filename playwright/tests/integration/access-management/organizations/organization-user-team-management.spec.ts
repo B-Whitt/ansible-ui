@@ -458,12 +458,15 @@ test.describe('Organization User and Team Management', () => {
       await page.getByRole('button', { name: 'Next', exact: true }).click();
 
       // Select organization roles
+      // Use Organization Auditor because Organization Credential Admin includes
+      // implicit member permission, and AAP-79673 correctly prohibits assigning
+      // organization member permission to teams.
       await expect(page.getByRole('heading', { name: 'Select organization roles' })).toBeVisible();
       await selectTableRow(
         {
           pageTitle: 'Select organization roles',
           filterLabel: 'Name',
-          filterValue: 'Organization Credential Admin',
+          filterValue: 'Organization Auditor',
         },
         page
       );
@@ -473,6 +476,11 @@ test.describe('Organization User and Team Management', () => {
       // Review and finish
       await expect(page.getByRole('heading', { name: 'Review' })).toBeVisible();
       await page.getByRole('button', { name: 'Finish' }).click();
+
+      // Navigate back to the organization Teams tab after wizard completes
+      await navigateTo(page, 'Access Management', 'Organizations');
+      await clickTableRow({ text: organizationName }, page);
+      await page.getByRole('tab', { name: 'Teams' }).click();
 
       // Verify team roles and manage them
       await expect(page.getByRole('heading', { name: organizationName })).toBeVisible();
@@ -486,12 +494,12 @@ test.describe('Organization User and Team Management', () => {
         page.getByRole('heading', { name: `Manage organization roles for ${teamName}` })
       ).toBeVisible();
 
-      // Remove the organization credential admin role
+      // Remove the organization auditor role
       await selectTableRow(
         {
           pageTitle: `Manage organization roles for ${teamName}`,
           filterLabel: 'Name',
-          filterValue: 'Organization Credential Admin',
+          filterValue: 'Organization Auditor',
         },
         page
       );
